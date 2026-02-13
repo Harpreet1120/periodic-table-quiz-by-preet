@@ -1,0 +1,22 @@
+{
+  "name": "Periodic Table Quiz",
+  "short_name": "PT Quiz",
+  "description": "Periodic Table yaad karo — Quiz, Flashcards aur Groups!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0c29",
+  "theme_color": "#f7971e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/f7971e/ffffff?text=PT",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/f7971e/ffffff?text=PT",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
