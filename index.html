@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Periodic Table Quiz</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #fff;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 5px;
+    background: linear-gradient(90deg, #f7971e, #ffd200);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #aaa;
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+  }
+
+  /* MODE SELECTOR */
+  .mode-selector {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+  }
+
+  .mode-btn {
+    padding: 10px 20px;
+    border: 2px solid #f7971e;
+    background: transparent;
+    color: #f7971e;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+
+  .mode-btn.active, .mode-btn:hover {
+    background: #f7971e;
+    color: #000;
+    font-weight: bold;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffd200;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: #aaa;
+    text-transform: uppercase;
+  }
+
+  /* QUIZ CARD */
+  .quiz-card {
+    max-width: 600px;
+    margin: 0 auto 25px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 35px 30px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+
+  .question-label {
+    font-size: 0.8rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+
+  .question-main {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .question-hint {
+    font-size: 0.9rem;
+    color: #aaa;
+    margin-bottom: 25px;
+  }
+
+  .element-display {
+    display: inline-block;
+    width: 110px;
+    height: 110px;
+    border-radius: 16px;
+    margin: 0 auto 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(255,255,255,0.3);
+  }
+
+  .elem-num { font-size: 0.85rem; color: rgba(255,255,255,0.8); }
+  .elem-sym { font-size: 2.5rem; font-weight: bold; }
+  .elem-name { font-size: 0.7rem; color: rgba(255,255,255,0.8); }
+
+  /* OPTIONS */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .option-btn {
+    padding: 14px 10px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: #f7971e;
+    background: rgba(247,151,30,0.15);
+    transform: scale(1.02);
+  }
+
+  .option-btn.correct {
+    border-color: #00e676;
+    background: rgba(0,230,118,0.2);
+    color: #00e676;
+    font-weight: bold;
+  }
+
+  .option-btn.wrong {
+    border-color: #ff5252;
+    background: rgba(255,82,82,0.2);
+    color: #ff5252;
+  }
+
+  /* INPUT MODE */
+  .input-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .input-area input {
+    flex: 1;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 1.1rem;
+    outline: none;
+    transition: border 0.3s;
+  }
+
+  .input-area input:focus { border-color: #f7971e; }
+
+  .input-area input.correct-input { border-color: #00e676; background: rgba(0,230,118,0.1); }
+  .input-area input.wrong-input { border-color: #ff5252; background: rgba(255,82,82,0.1); }
+
+  .submit-btn {
+    padding: 14px 22px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    color: #000;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .submit-btn:hover { transform: scale(1.05); }
+
+  /* FEEDBACK */
+  .feedback {
+    font-size: 1rem;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    display: none;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid #00e676; }
+  .feedback.wrong-fb { background: rgba(255,82,82,0.15); color: #ff5252; border: 1px solid #ff5252; }
+
+  /* NEXT BTN */
+  .next-btn {
+    padding: 13px 35px;
+    border-radius: 25px;
+    border: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .next-btn.show { display: inline-block; }
+  .next-btn:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(102,126,234,0.5); }
+
+  /* PROGRESS */
+  .progress-bar {
+    max-width: 600px;
+    margin: 0 auto 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f7971e, #ffd200);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  /* GROUPS REFERENCE */
+  .groups-ref {
+    max-width: 700px;
+    margin: 0 auto 25px;
+  }
+
+  .groups-ref h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    color: #ffd200;
+    font-size: 1.1rem;
+  }
+
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .group-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 12px 15px;
+  }
+
+  .group-title {
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .group-elements {
+    font-size: 0.85rem;
+    color: #ccc;
+    line-height: 1.5;
+  }
+
+  /* RESULT SCREEN */
+  .result-screen {
+    max-width: 500px;
+    margin: 30px auto;
+    text-align: center;
+    background: rgba(255,255,255,0.07);
+    border-radius: 20px;
+    padding: 40px 30px;
+    display: none;
+  }
+
+  .result-screen.show { display: block; }
+
+  .result-emoji { font-size: 4rem; margin-bottom: 15px; }
+  .result-score { font-size: 3rem; font-weight: bold; color: #ffd200; }
+  .result-msg { font-size: 1.1rem; color: #aaa; margin: 10px 0 25px; }
+
+  .restart-btn {
+    padding: 13px 35px;
+    border-radius: 25px;
+    border: none;
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    color: #000;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  /* CHEAT SHEET */
+  .cheat-sheet {
+    max-width: 750px;
+    margin: 0 auto;
+    display: none;
+  }
+
+  .cheat-sheet.show { display: block; }
+
+  .cheat-sheet h3 {
+    text-align: center;
+    color: #ffd200;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+  }
+
+  .elements-table {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+  }
+
+  .elem-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .elem-card:hover { transform: scale(1.05); border-color: #f7971e; }
+
+  .ec-num { font-size: 0.75rem; color: #888; }
+  .ec-sym { font-size: 1.5rem; font-weight: bold; color: #ffd200; }
+  .ec-name { font-size: 0.75rem; color: #ccc; }
+  .ec-mass { font-size: 0.7rem; color: #888; }
+
+  /* ===== FLASHCARD STYLES ===== */
+  .fc-filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .fc-filter-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.05);
+    color: #ccc;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+  }
+
+  .fc-filter-btn.active, .fc-filter-btn:hover {
+    border-color: #00e5ff;
+    background: rgba(0,229,255,0.15);
+    color: #00e5ff;
+    font-weight: bold;
+  }
+
+  .fc-stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .fc-stat { text-align: center; }
+  .fc-stat-num { display: block; font-size: 1.8rem; font-weight: bold; color: #00e5ff; }
+  .fc-stat-label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+
+  .fc-progress-bar {
+    max-width: 500px;
+    margin: 0 auto 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    height: 6px;
+    overflow: hidden;
+  }
+
+  .fc-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00e5ff, #00b0ff);
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  .fc-hint-text {
+    text-align: center;
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+    transition: opacity 0.3s;
+  }
+
+  /* 3D CARD */
+  .fc-scene {
+    width: 340px;
+    height: 220px;
+    margin: 0 auto 25px;
+    perspective: 900px;
+    cursor: pointer;
+  }
+
+  .fc-card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 20px;
+  }
+
+  .fc-card.flipped { transform: rotateY(180deg); }
+
+  .fc-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border: 2px solid rgba(255,255,255,0.15);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  }
+
+  .fc-front {
+    background: linear-gradient(135deg, rgba(0,229,255,0.08), rgba(102,126,234,0.12));
+    border-color: rgba(0,229,255,0.3);
+  }
+
+  .fc-back {
+    background: linear-gradient(135deg, rgba(247,151,30,0.15), rgba(255,210,0,0.08));
+    border-color: rgba(247,151,30,0.4);
+    transform: rotateY(180deg);
+  }
+
+  .fc-face-label {
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    margin-bottom: 6px;
+  }
+
+  /* Front: symbol extra large */
+  .fc-front .fc-big-symbol {
+    font-size: 5.5rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 0;
+    text-shadow: 0 0 40px currentColor;
+  }
+
+  /* Back: name big */
+  .fc-element-name {
+    font-size: 1.9rem;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .fc-back-details {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .fc-tap-hint {
+    position: absolute;
+    bottom: 12px;
+    right: 15px;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.25);
+  }
+
+  /* ACTION BUTTONS */
+  .fc-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    animation: fadeInUp 0.3s ease;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fc-btn {
+    padding: 12px 24px;
+    border-radius: 25px;
+    border: none;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .fc-btn:hover { transform: scale(1.06); }
+
+  .fc-btn-yes {
+    background: linear-gradient(135deg, #00c853, #00e676);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(0,230,118,0.35);
+  }
+
+  .fc-btn-no {
+    background: linear-gradient(135deg, #ff1744, #ff5252);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(255,82,82,0.35);
+  }
+
+  .fc-btn-skip {
+    background: rgba(255,255,255,0.12);
+    color: #ccc;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+
+  /* COMPLETE SCREEN */
+  .fc-complete {
+    max-width: 440px;
+    margin: 10px auto;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 35px 25px;
+    text-align: center;
+  }
+
+  .fc-complete-emoji { font-size: 3.5rem; margin-bottom: 10px; }
+  .fc-complete-title { font-size: 1.8rem; font-weight: bold; color: #ffd200; margin-bottom: 8px; }
+  .fc-complete-msg { color: #aaa; margin-bottom: 25px; line-height: 1.6; }
+
+  .fc-complete-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  .fc-restart-btn {
+    padding: 12px 24px;
+    border-radius: 25px;
+    border: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: transform 0.2s;
+  }
+
+  .fc-restart-btn:hover { transform: scale(1.05); }
+  .fc-weak-restart { background: linear-gradient(135deg, #ff1744, #ff6d00) !important; }
+
+  @media (max-width: 400px) {
+    .fc-scene { width: 290px; height: 190px; }
+    .fc-element-name { font-size: 1.6rem; }
+    .fc-big-symbol { font-size: 3rem; }
+  }
+
+  /* ===== END FLASHCARD STYLES ===== */
+  .nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+  }
+
+  .nav-tab {
+    padding: 9px 20px;
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+  }
+
+  .nav-tab.active {
+    background: rgba(255,255,255,0.1);
+    border-color: #ffd200;
+    color: #ffd200;
+    font-weight: bold;
+  }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  @media (max-width: 500px) {
+    .options-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 1.5rem; }
+    .quiz-card { padding: 25px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>⚗️ Periodic Table Quiz</h1>
+<p class="subtitle">Competitive Exam ke liye poori table yaad karo!</p>
+
+<!-- NAV -->
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showSection('quiz')">🎯 Quiz</button>
+  <button class="nav-tab" onclick="showSection('flashcards')">🃏 Flashcards</button>
+  <button class="nav-tab" onclick="showSection('cheatsheet')">📋 Cheat Sheet</button>
+  <button class="nav-tab" onclick="showSection('groups')">🧪 Groups</button>
+</div>
+
+<!-- QUIZ SECTION -->
+<div id="quiz" class="section active">
+  <div class="mode-selector">
+    <button class="mode-btn active" onclick="setMode('name-to-sym')">Naam → Symbol</button>
+    <button class="mode-btn" onclick="setMode('sym-to-name')">Symbol → Naam</button>
+    <button class="mode-btn" onclick="setMode('num-to-name')">Number → Naam</button>
+    <button class="mode-btn" onclick="setMode('type')">Wo konsa type hai?</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num" id="scoreNum">0</div><div class="stat-label">Sahi</div></div>
+    <div class="stat"><div class="stat-num" id="wrongNum">0</div><div class="stat-label">Galat</div></div>
+    <div class="stat"><div class="stat-num" id="totalNum">0</div><div class="stat-label">Total</div></div>
+    <div class="stat"><div class="stat-num" id="streakNum">0</div><div class="stat-label">Streak 🔥</div></div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+  </div>
+
+  <div class="quiz-card" id="quizCard">
+    <div class="question-label">Sawaal</div>
+    <div class="question-main" id="questionText"></div>
+    <div class="question-hint" id="questionHint"></div>
+    <div id="elementBox"></div>
+    <div id="optionsArea"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Agla Sawaal →</button>
+  </div>
+
+  <div class="result-screen" id="resultScreen">
+    <div class="result-emoji" id="resultEmoji">🏆</div>
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <button class="restart-btn" onclick="restartQuiz()">🔄 Phir Khelo</button>
+  </div>
+</div>
+
+<!-- FLASHCARD SECTION -->
+<div id="flashcards" class="section">
+  <div class="fc-filter-bar">
+    <button class="fc-filter-btn active" onclick="setFCFilter('all')">🌍 Saare (118)</button>
+    <button class="fc-filter-btn" onclick="setFCFilter('first20')">⭐ Pehle 20</button>
+    <button class="fc-filter-btn" onclick="setFCFilter('weak')">❗ Weak Cards</button>
+    <button class="fc-filter-btn" onclick="setFCFilter('metals')">🔩 Metals</button>
+    <button class="fc-filter-btn" onclick="setFCFilter('nonmetals')">💨 Non-metals</button>
+  </div>
+
+  <div class="fc-stats-bar">
+    <div class="fc-stat"><span class="fc-stat-num" id="fcDone">0</span><span class="fc-stat-label">Ho gaye</span></div>
+    <div class="fc-stat"><span class="fc-stat-num" id="fcRemaining">0</span><span class="fc-stat-label">Baaki</span></div>
+    <div class="fc-stat"><span class="fc-stat-num" id="fcKnown">0</span><span class="fc-stat-label">✅ Yaad</span></div>
+    <div class="fc-stat"><span class="fc-stat-num" id="fcUnknown">0</span><span class="fc-stat-label">❗ Weak</span></div>
+  </div>
+
+  <div class="fc-progress-bar">
+    <div class="fc-progress-fill" id="fcProgressFill" style="width:0%"></div>
+  </div>
+
+  <div class="fc-hint-text" id="fcHintText">👆 Card pe click karo — symbol dikhega!</div>
+
+  <!-- THE FLASHCARD -->
+  <div class="fc-scene" id="fcScene" onclick="flipCard()">
+    <div class="fc-card" id="fcCard">
+      <!-- FRONT: sirf symbol -->
+      <div class="fc-face fc-front" id="fcFront">
+        <div class="fc-face-label">SYMBOL KYA HAI?</div>
+        <div class="fc-big-symbol" id="fcSymbol">—</div>
+        <div class="fc-tap-hint">tap karke dekho →</div>
+      </div>
+      <!-- BACK: naam + details -->
+      <div class="fc-face fc-back" id="fcBack">
+        <div class="fc-face-label">JAWAAB</div>
+        <div class="fc-element-name" id="fcName">—</div>
+        <div class="fc-back-details" id="fcBackDetails"></div>
+        <div class="fc-tap-hint">tap to flip →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="fc-actions" id="fcActions" style="display:none">
+    <button class="fc-btn fc-btn-no" onclick="fcMarkWeak()">❗ Nahi Yaad</button>
+    <button class="fc-btn fc-btn-skip" onclick="fcNext()">⏭ Skip</button>
+    <button class="fc-btn fc-btn-yes" onclick="fcMarkKnown()">✅ Yaad Hai!</button>
+  </div>
+
+  <!-- DECK COMPLETE -->
+  <div class="fc-complete" id="fcComplete" style="display:none">
+    <div class="fc-complete-emoji">🎉</div>
+    <div class="fc-complete-title">Deck Complete!</div>
+    <div class="fc-complete-msg" id="fcCompleteMsg"></div>
+    <div class="fc-complete-btns">
+      <button class="fc-restart-btn" onclick="fcRestart(false)">🔄 Phir Se</button>
+      <button class="fc-restart-btn fc-weak-restart" onclick="fcRestart(true)" id="fcWeakRestartBtn">❗ Sirf Weak Cards</button>
+    </div>
+  </div>
+</div>
+<div id="cheatsheet" class="section">
+  <div class="cheat-sheet show">
+    <h3>📋 Saare Elements — Quick Reference</h3>
+    <div class="elements-table" id="elementsTable"></div>
+  </div>
+</div>
+
+<!-- GROUPS -->
+<div id="groups" class="section">
+  <div class="groups-ref">
+    <h3>🧪 Important Groups — Competitive Exams ke liye</h3>
+    <div class="groups-grid" id="groupsGrid"></div>
+  </div>
+</div>
+
+<script>
+const elements = [
+  {num:1, sym:"H", name:"Hydrogen", mass:"1.008", type:"Nonmetal"},
+  {num:2, sym:"He", name:"Helium", mass:"4.003", type:"Noble Gas"},
+  {num:3, sym:"Li", name:"Lithium", mass:"6.941", type:"Alkali Metal"},
+  {num:4, sym:"Be", name:"Beryllium", mass:"9.012", type:"Alkaline Earth Metal"},
+  {num:5, sym:"B", name:"Boron", mass:"10.811", type:"Metalloid"},
+  {num:6, sym:"C", name:"Carbon", mass:"12.011", type:"Nonmetal"},
+  {num:7, sym:"N", name:"Nitrogen", mass:"14.007", type:"Nonmetal"},
+  {num:8, sym:"O", name:"Oxygen", mass:"15.999", type:"Nonmetal"},
+  {num:9, sym:"F", name:"Fluorine", mass:"18.998", type:"Halogen"},
+  {num:10, sym:"Ne", name:"Neon", mass:"20.180", type:"Noble Gas"},
+  {num:11, sym:"Na", name:"Sodium", mass:"22.990", type:"Alkali Metal"},
+  {num:12, sym:"Mg", name:"Magnesium", mass:"24.305", type:"Alkaline Earth Metal"},
+  {num:13, sym:"Al", name:"Aluminium", mass:"26.982", type:"Post-transition Metal"},
+  {num:14, sym:"Si", name:"Silicon", mass:"28.086", type:"Metalloid"},
+  {num:15, sym:"P", name:"Phosphorus", mass:"30.974", type:"Nonmetal"},
+  {num:16, sym:"S", name:"Sulfur", mass:"32.065", type:"Nonmetal"},
+  {num:17, sym:"Cl", name:"Chlorine", mass:"35.453", type:"Halogen"},
+  {num:18, sym:"Ar", name:"Argon", mass:"39.948", type:"Noble Gas"},
+  {num:19, sym:"K", name:"Potassium", mass:"39.098", type:"Alkali Metal"},
+  {num:20, sym:"Ca", name:"Calcium", mass:"40.078", type:"Alkaline Earth Metal"},
+  {num:21, sym:"Sc", name:"Scandium", mass:"44.956", type:"Transition Metal"},
+  {num:22, sym:"Ti", name:"Titanium", mass:"47.867", type:"Transition Metal"},
+  {num:23, sym:"V", name:"Vanadium", mass:"50.942", type:"Transition Metal"},
+  {num:24, sym:"Cr", name:"Chromium", mass:"51.996", type:"Transition Metal"},
+  {num:25, sym:"Mn", name:"Manganese", mass:"54.938", type:"Transition Metal"},
+  {num:26, sym:"Fe", name:"Iron", mass:"55.845", type:"Transition Metal"},
+  {num:27, sym:"Co", name:"Cobalt", mass:"58.933", type:"Transition Metal"},
+  {num:28, sym:"Ni", name:"Nickel", mass:"58.693", type:"Transition Metal"},
+  {num:29, sym:"Cu", name:"Copper", mass:"63.546", type:"Transition Metal"},
+  {num:30, sym:"Zn", name:"Zinc", mass:"65.38", type:"Transition Metal"},
+  {num:31, sym:"Ga", name:"Gallium", mass:"69.723", type:"Post-transition Metal"},
+  {num:32, sym:"Ge", name:"Germanium", mass:"72.63", type:"Metalloid"},
+  {num:33, sym:"As", name:"Arsenic", mass:"74.922", type:"Metalloid"},
+  {num:34, sym:"Se", name:"Selenium", mass:"78.96", type:"Nonmetal"},
+  {num:35, sym:"Br", name:"Bromine", mass:"79.904", type:"Halogen"},
+  {num:36, sym:"Kr", name:"Krypton", mass:"83.798", type:"Noble Gas"},
+  {num:37, sym:"Rb", name:"Rubidium", mass:"85.468", type:"Alkali Metal"},
+  {num:38, sym:"Sr", name:"Strontium", mass:"87.62", type:"Alkaline Earth Metal"},
+  {num:39, sym:"Y", name:"Yttrium", mass:"88.906", type:"Transition Metal"},
+  {num:40, sym:"Zr", name:"Zirconium", mass:"91.224", type:"Transition Metal"},
+  {num:41, sym:"Nb", name:"Niobium", mass:"92.906", type:"Transition Metal"},
+  {num:42, sym:"Mo", name:"Molybdenum", mass:"95.96", type:"Transition Metal"},
+  {num:43, sym:"Tc", name:"Technetium", mass:"98", type:"Transition Metal"},
+  {num:44, sym:"Ru", name:"Ruthenium", mass:"101.07", type:"Transition Metal"},
+  {num:45, sym:"Rh", name:"Rhodium", mass:"102.906", type:"Transition Metal"},
+  {num:46, sym:"Pd", name:"Palladium", mass:"106.42", type:"Transition Metal"},
+  {num:47, sym:"Ag", name:"Silver", mass:"107.868", type:"Transition Metal"},
+  {num:48, sym:"Cd", name:"Cadmium", mass:"112.411", type:"Transition Metal"},
+  {num:49, sym:"In", name:"Indium", mass:"114.818", type:"Post-transition Metal"},
+  {num:50, sym:"Sn", name:"Tin", mass:"118.71", type:"Post-transition Metal"},
+  {num:51, sym:"Sb", name:"Antimony", mass:"121.76", type:"Metalloid"},
+  {num:52, sym:"Te", name:"Tellurium", mass:"127.60", type:"Metalloid"},
+  {num:53, sym:"I", name:"Iodine", mass:"126.904", type:"Halogen"},
+  {num:54, sym:"Xe", name:"Xenon", mass:"131.293", type:"Noble Gas"},
+  {num:55, sym:"Cs", name:"Caesium", mass:"132.905", type:"Alkali Metal"},
+  {num:56, sym:"Ba", name:"Barium", mass:"137.327", type:"Alkaline Earth Metal"},
+  {num:57, sym:"La", name:"Lanthanum", mass:"138.905", type:"Lanthanide"},
+  {num:58, sym:"Ce", name:"Cerium", mass:"140.116", type:"Lanthanide"},
+  {num:59, sym:"Pr", name:"Praseodymium", mass:"140.908", type:"Lanthanide"},
+  {num:60, sym:"Nd", name:"Neodymium", mass:"144.242", type:"Lanthanide"},
+  {num:61, sym:"Pm", name:"Promethium", mass:"145", type:"Lanthanide"},
+  {num:62, sym:"Sm", name:"Samarium", mass:"150.36", type:"Lanthanide"},
+  {num:63, sym:"Eu", name:"Europium", mass:"151.964", type:"Lanthanide"},
+  {num:64, sym:"Gd", name:"Gadolinium", mass:"157.25", type:"Lanthanide"},
+  {num:65, sym:"Tb", name:"Terbium", mass:"158.925", type:"Lanthanide"},
+  {num:66, sym:"Dy", name:"Dysprosium", mass:"162.5", type:"Lanthanide"},
+  {num:67, sym:"Ho", name:"Holmium", mass:"164.93", type:"Lanthanide"},
+  {num:68, sym:"Er", name:"Erbium", mass:"167.259", type:"Lanthanide"},
+  {num:69, sym:"Tm", name:"Thulium", mass:"168.934", type:"Lanthanide"},
+  {num:70, sym:"Yb", name:"Ytterbium", mass:"173.054", type:"Lanthanide"},
+  {num:71, sym:"Lu", name:"Lutetium", mass:"174.967", type:"Lanthanide"},
+  {num:72, sym:"Hf", name:"Hafnium", mass:"178.49", type:"Transition Metal"},
+  {num:73, sym:"Ta", name:"Tantalum", mass:"180.948", type:"Transition Metal"},
+  {num:74, sym:"W", name:"Tungsten", mass:"183.84", type:"Transition Metal"},
+  {num:75, sym:"Re", name:"Rhenium", mass:"186.207", type:"Transition Metal"},
+  {num:76, sym:"Os", name:"Osmium", mass:"190.23", type:"Transition Metal"},
+  {num:77, sym:"Ir", name:"Iridium", mass:"192.217", type:"Transition Metal"},
+  {num:78, sym:"Pt", name:"Platinum", mass:"195.084", type:"Transition Metal"},
+  {num:79, sym:"Au", name:"Gold", mass:"196.967", type:"Transition Metal"},
+  {num:80, sym:"Hg", name:"Mercury", mass:"200.59", type:"Transition Metal"},
+  {num:81, sym:"Tl", name:"Thallium", mass:"204.383", type:"Post-transition Metal"},
+  {num:82, sym:"Pb", name:"Lead", mass:"207.2", type:"Post-transition Metal"},
+  {num:83, sym:"Bi", name:"Bismuth", mass:"208.98", type:"Post-transition Metal"},
+  {num:84, sym:"Po", name:"Polonium", mass:"209", type:"Metalloid"},
+  {num:85, sym:"At", name:"Astatine", mass:"210", type:"Halogen"},
+  {num:86, sym:"Rn", name:"Radon", mass:"222", type:"Noble Gas"},
+  {num:87, sym:"Fr", name:"Francium", mass:"223", type:"Alkali Metal"},
+  {num:88, sym:"Ra", name:"Radium", mass:"226", type:"Alkaline Earth Metal"},
+  {num:89, sym:"Ac", name:"Actinium", mass:"227", type:"Actinide"},
+  {num:90, sym:"Th", name:"Thorium", mass:"232.038", type:"Actinide"},
+  {num:91, sym:"Pa", name:"Protactinium", mass:"231.036", type:"Actinide"},
+  {num:92, sym:"U", name:"Uranium", mass:"238.029", type:"Actinide"},
+  {num:93, sym:"Np", name:"Neptunium", mass:"237", type:"Actinide"},
+  {num:94, sym:"Pu", name:"Plutonium", mass:"244", type:"Actinide"},
+  {num:95, sym:"Am", name:"Americium", mass:"243", type:"Actinide"},
+  {num:96, sym:"Cm", name:"Curium", mass:"247", type:"Actinide"},
+  {num:97, sym:"Bk", name:"Berkelium", mass:"247", type:"Actinide"},
+  {num:98, sym:"Cf", name:"Californium", mass:"251", type:"Actinide"},
+  {num:99, sym:"Es", name:"Einsteinium", mass:"252", type:"Actinide"},
+  {num:100, sym:"Fm", name:"Fermium", mass:"257", type:"Actinide"},
+  {num:101, sym:"Md", name:"Mendelevium", mass:"258", type:"Actinide"},
+  {num:102, sym:"No", name:"Nobelium", mass:"259", type:"Actinide"},
+  {num:103, sym:"Lr", name:"Lawrencium", mass:"262", type:"Actinide"},
+  {num:104, sym:"Rf", name:"Rutherfordium", mass:"261", type:"Transition Metal"},
+  {num:105, sym:"Db", name:"Dubnium", mass:"262", type:"Transition Metal"},
+  {num:106, sym:"Sg", name:"Seaborgium", mass:"266", type:"Transition Metal"},
+  {num:107, sym:"Bh", name:"Bohrium", mass:"264", type:"Transition Metal"},
+  {num:108, sym:"Hs", name:"Hassium", mass:"267", type:"Transition Metal"},
+  {num:109, sym:"Mt", name:"Meitnerium", mass:"268", type:"Transition Metal"},
+  {num:110, sym:"Ds", name:"Darmstadtium", mass:"271", type:"Transition Metal"},
+  {num:111, sym:"Rg", name:"Roentgenium", mass:"272", type:"Transition Metal"},
+  {num:112, sym:"Cn", name:"Copernicium", mass:"285", type:"Transition Metal"},
+  {num:113, sym:"Nh", name:"Nihonium", mass:"284", type:"Post-transition Metal"},
+  {num:114, sym:"Fl", name:"Flerovium", mass:"289", type:"Post-transition Metal"},
+  {num:115, sym:"Mc", name:"Moscovium", mass:"288", type:"Post-transition Metal"},
+  {num:116, sym:"Lv", name:"Livermorium", mass:"293", type:"Post-transition Metal"},
+  {num:117, sym:"Ts", name:"Tennessine", mass:"294", type:"Halogen"},
+  {num:118, sym:"Og", name:"Oganesson", mass:"294", type:"Noble Gas"}
+];
+
+const typeColors = {
+  "Alkali Metal": "#e74c3c",
+  "Alkaline Earth Metal": "#e67e22",
+  "Transition Metal": "#3498db",
+  "Post-transition Metal": "#1abc9c",
+  "Metalloid": "#9b59b6",
+  "Nonmetal": "#27ae60",
+  "Halogen": "#f39c12",
+  "Noble Gas": "#2980b9",
+  "Lanthanide": "#8e44ad",
+  "Actinide": "#c0392b"
+};
+
+const groups = [
+  { title: "Alkali Metals (Group 1)", color: "#e74c3c", elements: "Li, Na, K, Rb, Cs, Fr — Soft metals, react with water" },
+  { title: "Alkaline Earth Metals (Group 2)", color: "#e67e22", elements: "Be, Mg, Ca, Sr, Ba, Ra — Hard, high melting point" },
+  { title: "Halogens (Group 17)", color: "#f39c12", elements: "F, Cl, Br, I, At, Ts — Most reactive nonmetals" },
+  { title: "Noble Gases (Group 18)", color: "#2980b9", elements: "He, Ne, Ar, Kr, Xe, Rn, Og — Inert, full outer shell" },
+  { title: "Coinage Metals", color: "#f1c40f", elements: "Cu (29), Ag (47), Au (79) — Used in coins/jewelry" },
+  { title: "Lanthanides (f-block)", color: "#8e44ad", elements: "La (57) to Lu (71) — Rare earth elements" },
+  { title: "Actinides (f-block)", color: "#c0392b", elements: "Ac (89) to Lr (103) — Mostly radioactive" },
+  { title: "Radioactive Elements", color: "#95a5a6", elements: "Tc, Pm + All elements from Bi (83) onwards" },
+  { title: "Metalloids", color: "#9b59b6", elements: "B, Si, Ge, As, Se, Sb, Te, Po — Semi-conductors" },
+  { title: "Transition Metals (d-block)", color: "#3498db", elements: "Sc to Zn, Y to Cd, La, Hf to Hg — Colored compounds" }
+];
+
+// State
+let mode = 'name-to-sym';
+let score = 0, wrong = 0, streak = 0;
+let currentElement = null;
+let answered = false;
+let questionCount = 0;
+const TOTAL_QUESTIONS = 20;
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn').forEach((b,i) => {
+    const modes = ['name-to-sym','sym-to-name','num-to-name','type'];
+    b.classList.toggle('active', modes[i] === m);
+  });
+  restartQuiz();
+}
+
+function showSection(s) {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(s).classList.add('active');
+  const tabs = ['quiz','flashcards','cheatsheet','groups'];
+  const idx = tabs.indexOf(s);
+  document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  if(s === 'cheatsheet') renderCheatSheet();
+  if(s === 'groups') renderGroups();
+  if(s === 'flashcards') initFlashcards();
+}
+
+function renderCheatSheet() {
+  const container = document.getElementById('elementsTable');
+  container.innerHTML = elements.map(e => `
+    <div class="elem-card" style="border-color:${typeColors[e.type]}33">
+      <div class="ec-num">${e.num}</div>
+      <div class="ec-sym" style="color:${typeColors[e.type]}">${e.sym}</div>
+      <div class="ec-name">${e.name}</div>
+      <div class="ec-mass">${e.mass}</div>
+    </div>
+  `).join('');
+}
+
+function renderGroups() {
+  document.getElementById('groupsGrid').innerHTML = groups.map(g => `
+    <div class="group-card" style="border-color:${g.color}55">
+      <div class="group-title" style="color:${g.color}">${g.title}</div>
+      <div class="group-elements">${g.elements}</div>
+    </div>
+  `).join('');
+}
+
+function getRandomElements(exclude, count) {
+  const pool = elements.filter(e => e.num !== exclude.num);
+  const shuffled = pool.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+function nextQuestion() {
+  if(questionCount >= TOTAL_QUESTIONS) {
+    showResult();
+    return;
+  }
+  answered = false;
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('feedback').classList.remove('show');
+  document.getElementById('quizCard').style.display = 'block';
+  document.getElementById('resultScreen').classList.remove('show');
+  generateQuestion();
+}
+
+function generateQuestion() {
+  questionCount++;
+  const pct = ((questionCount-1)/TOTAL_QUESTIONS)*100;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  currentElement = elements[Math.floor(Math.random() * elements.length)];
+  const wrong4 = getRandomElements(currentElement, 3);
+  const options = [currentElement, ...wrong4].sort(() => Math.random() - 0.5);
+  const color = typeColors[currentElement.type] || '#888';
+
+  let qText = '', hint = '', boxHTML = '', optHTML = '';
+
+  if(mode === 'name-to-sym') {
+    qText = currentElement.name;
+    hint = `Atomic Number: ${currentElement.num} | Type: ${currentElement.type}`;
+    boxHTML = '';
+    optHTML = buildMCQ(options, 'sym', currentElement.sym);
+  }
+  else if(mode === 'sym-to-name') {
+    qText = 'Is symbol ka naam kya hai?';
+    hint = `Type: ${currentElement.type}`;
+    boxHTML = `<div class="element-display" style="background:${color}33;border-color:${color}">
+      <div class="elem-num">${currentElement.num}</div>
+      <div class="elem-sym">${currentElement.sym}</div>
+      <div class="elem-name">?</div>
+    </div>`;
+    optHTML = buildMCQ(options, 'name', currentElement.name);
+  }
+  else if(mode === 'num-to-name') {
+    qText = `Atomic Number ${currentElement.num} ka element kaun sa hai?`;
+    hint = `Type: ${currentElement.type}`;
+    boxHTML = `<div class="element-display" style="background:${color}33;border-color:${color}">
+      <div class="elem-num" style="font-size:2rem;font-weight:bold">${currentElement.num}</div>
+    </div>`;
+    optHTML = buildMCQ(options, 'name', currentElement.name);
+  }
+  else if(mode === 'type') {
+    qText = `${currentElement.name} (${currentElement.sym}) kaunse type ka element hai?`;
+    hint = `Atomic Number: ${currentElement.num}`;
+    boxHTML = `<div class="element-display" style="background:${color}33;border-color:${color}">
+      <div class="elem-num">${currentElement.num}</div>
+      <div class="elem-sym">${currentElement.sym}</div>
+    </div>`;
+    // Type options
+    const types = [...new Set(elements.map(e=>e.type))];
+    const wrongTypes = types.filter(t=>t!==currentElement.type).sort(()=>Math.random()-0.5).slice(0,3);
+    const typeOpts = [currentElement.type, ...wrongTypes].sort(()=>Math.random()-0.5);
+    optHTML = `<div class="options-grid">${typeOpts.map(t=>`
+      <button class="option-btn" onclick="checkType('${t.replace(/'/g,"\\'")}')">
+        ${t}
+      </button>`).join('')}</div>`;
+  }
+
+  document.getElementById('questionLabel') && (document.querySelector('.question-label').textContent = `Sawaal ${questionCount}/${TOTAL_QUESTIONS}`);
+  document.querySelector('.question-label').textContent = `Sawaal ${questionCount}/${TOTAL_QUESTIONS}`;
+  document.getElementById('questionText').textContent = qText;
+  document.getElementById('questionHint').textContent = hint;
+  document.getElementById('elementBox').innerHTML = boxHTML;
+  document.getElementById('optionsArea').innerHTML = optHTML;
+}
+
+function buildMCQ(options, field, correctVal) {
+  return `<div class="options-grid">
+    ${options.map(o => `
+      <button class="option-btn" onclick="checkAnswer(this, '${o[field].replace(/'/g,"\\'")}', '${correctVal.replace(/'/g,"\\'")}')">
+        ${o[field]}
+      </button>`).join('')}
+  </div>`;
+}
+
+function checkAnswer(btn, chosen, correct) {
+  if(answered) return;
+  answered = true;
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if(b.textContent.trim() === correct) b.classList.add('correct');
+  });
+
+  const fb = document.getElementById('feedback');
+  if(chosen === correct) {
+    score++;
+    streak++;
+    btn.classList.add('correct');
+    fb.textContent = `✅ Sahi! "${correct}" bilkul theek hai!`;
+    fb.className = 'feedback show correct-fb';
+  } else {
+    wrong++;
+    streak = 0;
+    btn.classList.add('wrong');
+    fb.textContent = `❌ Galat! Sahi jawab: "${correct}"`;
+    fb.className = 'feedback show wrong-fb';
+  }
+  updateStats();
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function checkType(chosen) {
+  if(answered) return;
+  checkAnswer({classList:{add:()=>{},contains:()=>false}, textContent:chosen, disabled:false},
+    chosen, currentElement.type);
+  // Manually fix buttons since we passed a fake btn
+  answered = true;
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    const t = b.textContent.trim();
+    if(t === currentElement.type) b.classList.add('correct');
+    else if(t === chosen && chosen !== currentElement.type) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedback');
+  if(chosen === currentElement.type) {
+    score++;
+    streak++;
+    fb.textContent = `✅ Sahi! ${currentElement.name} ek ${currentElement.type} hai!`;
+    fb.className = 'feedback show correct-fb';
+  } else {
+    wrong++;
+    streak = 0;
+    fb.textContent = `❌ Galat! ${currentElement.name} ek ${currentElement.type} hai, ${chosen} nahi.`;
+    fb.className = 'feedback show wrong-fb';
+  }
+  updateStats();
+  document.getElementById('nextBtn').classList.add('show');
+}
+
+function updateStats() {
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('wrongNum').textContent = wrong;
+  document.getElementById('totalNum').textContent = questionCount;
+  document.getElementById('streakNum').textContent = streak;
+}
+
+function showResult() {
+  document.getElementById('quizCard').style.display = 'none';
+  const rs = document.getElementById('resultScreen');
+  rs.classList.add('show');
+  const pct = Math.round((score/TOTAL_QUESTIONS)*100);
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('resultScore').textContent = `${score}/${TOTAL_QUESTIONS} (${pct}%)`;
+
+  let emoji, msg;
+  if(pct >= 90) { emoji = "🏆"; msg = "Zabardast! Tum expert ho!"; }
+  else if(pct >= 70) { emoji = "🎯"; msg = "Bahut achha! Thodi aur practice karo."; }
+  else if(pct >= 50) { emoji = "📚"; msg = "Theek hai! Aur mehnat karo."; }
+  else { emoji = "💪"; msg = "Himmat rakho! Practice se sab hoga."; }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultMsg').textContent = msg;
+}
+
+function restartQuiz() {
+  score = 0; wrong = 0; streak = 0; questionCount = 0; answered = false;
+  updateStats();
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('quizCard').style.display = 'block';
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('feedback').classList.remove('show');
+  generateQuestion();
+}
+
+
+// ===== FLASHCARD LOGIC =====
+let fcDeck = [];
+let fcIndex = 0;
+let fcKnownSet = new Set();
+let fcWeakSet = new Set();
+let fcFilter = 'all';
+let fcFlipped = false;
+
+function setFCFilter(f) {
+  fcFilter = f;
+  document.querySelectorAll('.fc-filter-btn').forEach((b, i) => {
+    const filters = ['all', 'first20', 'weak', 'metals', 'nonmetals'];
+    b.classList.toggle('active', filters[i] === f);
+  });
+  initFlashcards();
+}
+
+function buildFCDeck(filter) {
+  let pool;
+  const metalTypes = ["Alkali Metal","Alkaline Earth Metal","Transition Metal","Post-transition Metal","Lanthanide","Actinide"];
+  const nonmetalTypes = ["Nonmetal","Halogen","Noble Gas","Metalloid"];
+
+  if (filter === 'first20') pool = elements.slice(0, 20);
+  else if (filter === 'weak') pool = elements.filter(e => fcWeakSet.has(e.num));
+  else if (filter === 'metals') pool = elements.filter(e => metalTypes.includes(e.type));
+  else if (filter === 'nonmetals') pool = elements.filter(e => nonmetalTypes.includes(e.type));
+  else pool = [...elements];
+
+  // Shuffle
+  return pool.sort(() => Math.random() - 0.5);
+}
+
+function initFlashcards() {
+  fcDeck = buildFCDeck(fcFilter);
+  fcIndex = 0;
+  fcFlipped = false;
+
+  if (fcDeck.length === 0) {
+    document.getElementById('fcScene').style.display = 'none';
+    document.getElementById('fcActions').style.display = 'none';
+    document.getElementById('fcComplete').style.display = 'block';
+    document.getElementById('fcCompleteMsg').textContent =
+      fcFilter === 'weak'
+        ? "Koi weak card nahi hai abhi! Quiz khelo pehle."
+        : "Koi card nahi mila is filter mein.";
+    return;
+  }
+
+  document.getElementById('fcScene').style.display = 'block';
+  document.getElementById('fcComplete').style.display = 'none';
+  document.getElementById('fcActions').style.display = 'none';
+  document.getElementById('fcHintText').style.opacity = '1';
+  document.getElementById('fcCard').classList.remove('flipped');
+
+  updateFCStats();
+  showFCCard();
+}
+
+function showFCCard() {
+  if (fcIndex >= fcDeck.length) {
+    showFCComplete();
+    return;
+  }
+
+  const el = fcDeck[fcIndex];
+  const color = typeColors[el.type] || '#888';
+
+  fcFlipped = false;
+  document.getElementById('fcCard').classList.remove('flipped');
+
+  // FRONT: sirf bada symbol
+  document.getElementById('fcSymbol').textContent = el.sym;
+  document.getElementById('fcSymbol').style.color = color;
+
+  // BACK: naam + atomic number + mass + type
+  document.getElementById('fcName').textContent = el.name;
+  document.getElementById('fcBackDetails').innerHTML =
+    `<span style="color:#00e5ff">Atomic No: <b>${el.num}</b></span><br>
+     Atomic Mass: <b>${el.mass}</b><br>
+     Type: <b style="color:${color}">${el.type}</b>`;
+
+  // Border colors
+  document.getElementById('fcFront').style.borderColor = color + '88';
+  document.getElementById('fcBack').style.borderColor = color + '55';
+
+  document.getElementById('fcActions').style.display = 'none';
+  document.getElementById('fcHintText').textContent = '👆 Symbol dekho — naam yaad hai? Click karo!';
+  document.getElementById('fcHintText').style.opacity = '1';
+
+  updateFCStats();
+}
+
+function flipCard() {
+  if (fcIndex >= fcDeck.length) return;
+  fcFlipped = !fcFlipped;
+  document.getElementById('fcCard').classList.toggle('flipped', fcFlipped);
+
+  if (fcFlipped) {
+    document.getElementById('fcActions').style.display = 'flex';
+    document.getElementById('fcHintText').textContent = 'Naam pehchana? Batao yaad tha ya nahi 👇';
+  } else {
+    document.getElementById('fcActions').style.display = 'none';
+    document.getElementById('fcHintText').textContent = '👆 Symbol dekho — naam yaad hai? Click karo!';
+  }
+}
+
+function fcMarkKnown() {
+  const el = fcDeck[fcIndex];
+  fcKnownSet.add(el.num);
+  fcWeakSet.delete(el.num);
+  fcNext();
+}
+
+function fcMarkWeak() {
+  const el = fcDeck[fcIndex];
+  fcWeakSet.add(el.num);
+  fcKnownSet.delete(el.num);
+  fcNext();
+}
+
+function fcNext() {
+  fcIndex++;
+  if (fcIndex >= fcDeck.length) {
+    showFCComplete();
+  } else {
+    showFCCard();
+  }
+  updateFCStats();
+}
+
+function updateFCStats() {
+  const total = fcDeck.length;
+  const done = fcIndex;
+  const remaining = Math.max(0, total - done);
+  const pct = total > 0 ? (done / total) * 100 : 0;
+
+  document.getElementById('fcDone').textContent = done;
+  document.getElementById('fcRemaining').textContent = remaining;
+  document.getElementById('fcKnown').textContent = fcKnownSet.size;
+  document.getElementById('fcUnknown').textContent = fcWeakSet.size;
+  document.getElementById('fcProgressFill').style.width = pct + '%';
+}
+
+function showFCComplete() {
+  document.getElementById('fcScene').style.display = 'none';
+  document.getElementById('fcActions').style.display = 'none';
+  document.getElementById('fcHintText').style.opacity = '0';
+  document.getElementById('fcComplete').style.display = 'block';
+
+  const total = fcDeck.length;
+  const knownInDeck = fcDeck.filter(e => fcKnownSet.has(e.num)).length;
+  const weakInDeck = fcDeck.filter(e => fcWeakSet.has(e.num)).length;
+
+  const pct = total > 0 ? Math.round((knownInDeck / total) * 100) : 0;
+  let msg = `${total} cards mein se ${knownInDeck} yaad the (${pct}%).\n`;
+  if (weakInDeck > 0) msg += `${weakInDeck} weak cards hain — "Sirf Weak Cards" button se practice karo!`;
+  else msg += `Koi weak card nahi! Sab yaad hai 🎉`;
+
+  document.getElementById('fcCompleteMsg').textContent = msg;
+
+  const weakBtn = document.getElementById('fcWeakRestartBtn');
+  weakBtn.style.display = fcWeakSet.size > 0 ? 'inline-block' : 'none';
+}
+
+function fcRestart(onlyWeak) {
+  if (onlyWeak) {
+    setFCFilter('weak');
+  } else {
+    initFlashcards();
+  }
+}
+
+// ===== END FLASHCARD LOGIC =====
+
+// Start
+restartQuiz();
+</script>
+</body>
+</html>
